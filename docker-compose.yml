@@ -1,0 +1,49 @@
+services:
+  mongodb:
+    image: mongo:6.0
+    container_name: mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    environment:
+      MONGO_INITDB_DATABASE: project_manager
+    volumes:
+      - mongodb_data:/data/db
+    networks:
+      - devops-network
+
+  backend:
+    build: ./backend
+    container_name: backend
+    restart: unless-stopped
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+      - DB_URL=mongodb://mongodb:27017/project_manager
+      - CORS_ORIGIN=http://localhost:5173
+    depends_on:
+      - mongodb
+    networks:
+      - devops-network
+
+  frontend:
+    build: ./front
+    container_name: frontend
+    restart: unless-stopped
+    ports:
+      - "5173:5173"
+    environment:
+      - VITE_API_URL=http://localhost:3001
+    depends_on:
+      - backend
+    networks:
+      - devops-network
+
+volumes:
+  mongodb_data:
+
+networks:
+  devops-network:
+    driver: bridge
