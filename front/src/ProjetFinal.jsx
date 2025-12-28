@@ -1,6 +1,11 @@
-
 import { useReducer, useState, useEffect } from "react";
 import { projectReducer, initialProjects } from "./reducers/projectReducer";
+import {
+  fetchProjects,
+  createProject,
+  updateProject,
+  deleteProject,
+} from "./api";
 
 function ProjetFinal() {
   // 1) useReducer : gestion des projets (CRUD)
@@ -22,23 +27,23 @@ function ProjetFinal() {
   const [seconds, setSeconds] = useState(0);
   const [isActive, setIsActive] = useState(false);
 
-  // ------------------- useEffect : localStorage -------------------
-
-  // Charger depuis localStorage au montage
+  // ------------------- useEffect : chargement depuis backend -------------------
   useEffect(() => {
-    const saved = localStorage.getItem("projects");
-    if (saved) {
-      dispatch({
-        type: "LOAD_PROJECTS",
-        payload: JSON.parse(saved),
-      });
-    }
+    let mounted = true;
+    (async () => {
+      try {
+        const data = await fetchProjects();
+        if (mounted) {
+          dispatch({ type: "LOAD_PROJECTS", payload: data });
+        }
+      } catch (err) {
+        console.error("Erreur chargement projets:", err.message);
+      }
+    })();
+    return () => {
+      mounted = false;
+    };
   }, []);
-
-  // Sauvegarder dans localStorage à chaque modification
-  useEffect(() => {
-    localStorage.setItem("projects", JSON.stringify(projects));
-  }, [projects]);
 
   // ------------------- useEffect : Timer Pomodoro -------------------
 
@@ -80,32 +85,51 @@ function ProjetFinal() {
     e.preventDefault();
     if (!title.trim() || !description.trim() || !deadline) return;
 
-    dispatch({
-      type: "ADD_PROJECT",
-      payload: { title, description, status, deadline },
-    });
-
-    setTitle("");
-    setDescription("");
-    setStatus("todo");
-    setDeadline("");
+    (async () => {
+      try {
+        const created = await createProject({
+          title,
+          description,
+          status,
+          deadline,
+        });
+        dispatch({ type: "ADD_PROJECT", payload: created });
+        setTitle("");
+        setDescription("");
+        setStatus("todo");
+        setDeadline("");
+      } catch (err) {
+        console.error("Erreur création projet:", err.message);
+      }
+    })();
   }
 
   function handleDeleteProject(id) {
-    dispatch({ type: "DELETE_PROJECT", payload: id });
-    if (activeProjectId === id) {
-      setIsActive(false);
-      setActiveProjectId(null);
-      setMinutes(25);
-      setSeconds(0);
-    }
+    (async () => {
+      try {
+        await deleteProject(id);
+        dispatch({ type: "DELETE_PROJECT", payload: id });
+        if (activeProjectId === id) {
+          setIsActive(false);
+          setActiveProjectId(null);
+          setMinutes(25);
+          setSeconds(0);
+        }
+      } catch (err) {
+        console.error("Erreur suppression projet:", err.message);
+      }
+    })();
   }
 
   function handleStatusChange(id, newStatus) {
-    dispatch({
-      type: "UPDATE_STATUS",
-      payload: { id, status: newStatus },
-    });
+    (async () => {
+      try {
+        const updated = await updateProject(id, { status: newStatus });
+        dispatch({ type: "UPDATE_STATUS", payload: updated });
+      } catch (err) {
+        console.error("Erreur mise à jour statut:", err.message);
+      }
+    })();
   }
 
   function startTimerForProject(id) {
@@ -126,8 +150,6 @@ function ProjetFinal() {
       setSeconds(0);
     }
   }
-
-  
 
   let visibleProjects = [...projects];
 
@@ -160,15 +182,15 @@ function ProjetFinal() {
   // Statistiques
   const total = projects.length;
   const todoCount = projects.filter((p) => p.status === "todo").length;
-  const doingCount = projects.filter((p) => p.status === "doing").length;
+  const doingCount = projects.filter((p) => p.status === "in_progress").length;
   const doneCount = projects.filter((p) => p.status === "done").length;
 
   // ------------------- Render -------------------
 
   return (
     <div
-          style={{
-          marginLeft:"500px" ,
+      style={{
+        marginLeft: "500px",
         maxWidth: "900px",
         margin: "40px auto",
         padding: "20px",
@@ -202,7 +224,7 @@ function ProjetFinal() {
             style={{ padding: "8px" }}
           >
             <option value="todo">À faire</option>
-            <option value="doing">En cours</option>
+            <option value="in_progress">En cours</option>
             <option value="done">Terminé</option>
           </select>
           <input
@@ -249,7 +271,7 @@ function ProjetFinal() {
       >
         <div>
           <strong>Filtrer par statut : </strong>
-          {["all", "todo", "doing", "done"].map((s) => (
+          {["all", "todo", "in_progress", "done"].map((s) => (
             <button
               key={s}
               onClick={() => setFilterStatus(s)}
@@ -267,7 +289,7 @@ function ProjetFinal() {
                 ? "Tous"
                 : s === "todo"
                 ? "À faire"
-                : s === "doing"
+                : s === "in_progress"
                 ? "En cours"
                 : "Terminé"}
             </button>
@@ -331,10 +353,10 @@ function ProjetFinal() {
           </p>
         ) : (
           visibleProjects.map((project) => {
-            const isCurrent = activeProjectId === project.id;
+            const isCurrent = activeProjectId === project._id;
             return (
               <div
-                key={project.id}
+                key={project._id}
                 style={{
                   border: "1px solid #ccc",
                   borderRadius: "8px",
@@ -343,7 +365,7 @@ function ProjetFinal() {
                   backgroundColor:
                     project.status === "done"
                       ? "#d5f5e3"
-                      : project.status === "doing"
+                      : project.status === "in_progress"
                       ? "#fcf3cf"
                       : "white",
                 }}
@@ -352,16 +374,17 @@ function ProjetFinal() {
                 <p>{project.description}</p>
                 <p>
                   <strong>Statut :</strong> {project.status} |{" "}
-                  <strong>Deadline :</strong> {project.deadline}
+                  <strong>Deadline :</strong>{" "}
+                  {new Date(project.deadline).toLocaleDateString()}
                 </p>
 
                 {/* Changement de statut */}
                 <div style={{ marginBottom: "10px" }}>
                   <strong>Changer le statut : </strong>
-                  {["todo", "doing", "done"].map((s) => (
+                  {["todo", "in_progress", "done"].map((s) => (
                     <button
                       key={s}
-                      onClick={() => handleStatusChange(project.id, s)}
+                      onClick={() => handleStatusChange(project._id, s)}
                       style={{
                         marginLeft: "5px",
                         padding: "5px 8px",
@@ -404,7 +427,7 @@ function ProjetFinal() {
                   <div style={{ marginTop: "8px" }}>
                     {!isCurrent && (
                       <button
-                        onClick={() => startTimerForProject(project.id)}
+                        onClick={() => startTimerForProject(project._id)}
                         style={{
                           padding: "6px 10px",
                           marginRight: "5px",
@@ -451,7 +474,7 @@ function ProjetFinal() {
                 </div>
 
                 <button
-                  onClick={() => handleDeleteProject(project.id)}
+                  onClick={() => handleDeleteProject(project._id)}
                   style={{
                     padding: "6px 12px",
                     backgroundColor: "#e74c3c",

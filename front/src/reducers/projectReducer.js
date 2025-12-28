@@ -1,37 +1,24 @@
-
 export const initialProjects = [];
 
 export function projectReducer(state, action) {
   switch (action.type) {
     case "LOAD_PROJECTS":
-      // payload = tableau de projets depuis localStorage
-      return action.payload || [];
+      // payload = tableau de projets depuis backend
+      return Array.isArray(action.payload) ? action.payload : [];
 
     case "ADD_PROJECT":
-      // payload = { title, description, status, deadline }
-      return [
-        {
-          id: Date.now(),
-          title: action.payload.title,
-          description: action.payload.description,
-          status: action.payload.status,
-          deadline: action.payload.deadline,
-          createdAt: new Date().toISOString(),
-        },
-        ...state,
-      ];
+      // payload = projet créé retourné par backend
+      return [action.payload, ...state];
 
     case "UPDATE_STATUS":
-      // payload = { id, status }
+      // payload = projet mis à jour (retourné par backend)
       return state.map((project) =>
-        project.id === action.payload.id
-          ? { ...project, status: action.payload.status }
-          : project
+        project._id === action.payload._id ? action.payload : project
       );
 
     case "DELETE_PROJECT":
-      // payload = id
-      return state.filter((project) => project.id !== action.payload);
+      // payload = id (_id Mongo)
+      return state.filter((project) => project._id !== action.payload);
 
     default:
       return state;
