@@ -39,27 +39,6 @@ pipeline {
       }
     }
 
-    stage('Install deps (backend)') {
-      steps {
-        sh '''
-          set -eux
-          cd backend
-          npm ci || npm install
-        '''
-      }
-    }
-
-    stage('Install + lint (front)') {
-      steps {
-        sh '''
-          set -eux
-          cd front
-          npm ci || npm install
-          npm run lint || true
-        '''
-      }
-    }
-
     stage('Build & Push Backend Image') {
       steps {
         sh '''
