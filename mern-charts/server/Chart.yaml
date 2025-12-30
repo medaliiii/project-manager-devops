@@ -1,0 +1,6 @@
+apiVersion: v2
+name: server
+description: Backend Server Helm chart for MERN stack
+type: application
+version: 1.0.0
+appVersion: "latest"

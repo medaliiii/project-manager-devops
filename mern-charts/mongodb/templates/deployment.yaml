@@ -1,0 +1,36 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: {{ .Values.fullnameOverride | default "mongodb" }}
+  labels:
+    app: {{ .Values.fullnameOverride | default "mongodb" }}
+spec:
+  replicas: {{ .Values.replicaCount }}
+  selector:
+    matchLabels:
+      app: {{ .Values.fullnameOverride | default "mongodb" }}
+  template:
+    metadata:
+      labels:
+        app: {{ .Values.fullnameOverride | default "mongodb" }}
+    spec:
+      containers:
+      - name: mongodb
+        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+        imagePullPolicy: {{ .Values.image.pullPolicy }}
+        ports:
+        - containerPort: {{ .Values.service.port }}
+          name: mongodb
+        resources:
+          {{- toYaml .Values.resources | nindent 10 }}
+        {{- if .Values.persistence.enabled }}
+        volumeMounts:
+        - name: mongodb-data
+          mountPath: /data/db
+        {{- end }}
+      {{- if .Values.persistence.enabled }}
+      volumes:
+      - name: mongodb-data
+        persistentVolumeClaim:
+          claimName: {{ .Values.fullnameOverride | default "mongodb" }}-pvc
+      {{- end }}

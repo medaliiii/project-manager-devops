@@ -1,0 +1,62 @@
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: mongodb
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/medaliiii/project-manager-devops.git
+    targetRevision: HEAD
+    path: mern-charts/mongodb
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: project-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: server
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/medaliiii/project-manager-devops.git
+    targetRevision: HEAD
+    path: mern-charts/server
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: project-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true
+---
+apiVersion: argoproj.io/v1alpha1
+kind: Application
+metadata:
+  name: client
+  namespace: argocd
+spec:
+  project: default
+  source:
+    repoURL: https://github.com/medaliiii/project-manager-devops.git
+    targetRevision: HEAD
+    path: mern-charts/client
+  destination:
+    server: https://kubernetes.default.svc
+    namespace: project-manager
+  syncPolicy:
+    automated:
+      prune: true
+      selfHeal: true
+    syncOptions:
+      - CreateNamespace=true

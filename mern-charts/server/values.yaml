@@ -1,0 +1,26 @@
+replicaCount: 1
+
+image:
+  repository: daliii/project-manager-backend
+  tag: latest
+  pullPolicy: Always
+
+service:
+  type: ClusterIP
+  port: 5000
+
+env:
+  mongoUri: "mongodb://mongodb:27017/mydb"
+  port: "5000"
+  nodeEnv: "production"
+
+resources:
+  limits:
+    cpu: 500m
+    memory: 512Mi
+  requests:
+    cpu: 250m
+    memory: 256Mi
+
+nameOverride: "server"
+fullnameOverride: "server"

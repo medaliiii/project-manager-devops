@@ -1,0 +1,31 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: { { .Values.fullnameOverride | default "server" } }
+  labels:
+    app: { { .Values.fullnameOverride | default "server" } }
+spec:
+  replicas: { { .Values.replicaCount } }
+  selector:
+    matchLabels:
+      app: { { .Values.fullnameOverride | default "server" } }
+  template:
+    metadata:
+      labels:
+        app: { { .Values.fullnameOverride | default "server" } }
+    spec:
+      containers:
+        - name: server
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: { { .Values.image.pullPolicy } }
+          ports:
+            - containerPort: { { .Values.service.port } }
+              name: http
+          env:
+            - name: MONGO_URI
+              value: { { .Values.env.mongoUri | quote } }
+            - name: PORT
+              value: { { .Values.env.port | quote } }
+            - name: NODE_ENV
+              value: { { .Values.env.nodeEnv | quote } }
+          resources: { { - toYaml .Values.resources | nindent 10 } }
