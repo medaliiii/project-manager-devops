@@ -4,10 +4,10 @@ metadata:
   name: { { include "client.fullname" . } }
   labels: { { - include "client.labels" . | nindent 4 } }
 spec:
-  type: { { .Values.service.type } }
+  type: { { .Values.service.type | default "ClusterIP" } }
   ports:
-    - port: { { .Values.service.port } }
-      targetPort: { { .Values.service.port } }
+    - name: http
+      port: { { .Values.service.port | default 3000 } }
+      targetPort: http
       protocol: TCP
-      name: http
   selector: { { - include "client.selectorLabels" . | nindent 4 } }
