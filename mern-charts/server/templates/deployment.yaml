@@ -1,31 +1,29 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: { { .Values.fullnameOverride | default "server" } }
+  name: {{ include "server.fullname" . }}
   labels:
-    app: { { .Values.fullnameOverride | default "server" } }
+    {{- include "server.labels" . | nindent 4 }}
 spec:
-  replicas: { { .Values.replicaCount } }
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
-      app: { { .Values.fullnameOverride | default "server" } }
+      {{- include "server.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: { { .Values.fullnameOverride | default "server" } }
+        {{- include "server.selectorLabels" . | nindent 8 }}
     spec:
       containers:
         - name: server
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: { { .Values.image.pullPolicy } }
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           ports:
-            - containerPort: { { .Values.service.port } }
-              name: http
+            - name: http
+              containerPort: {{ .Values.service.port | default 5000 }}
+              protocol: TCP
           env:
             - name: MONGO_URI
-              value: { { .Values.env.mongoUri | quote } }
+              value: {{ .Values.env.mongoUri | quote }}
             - name: PORT
-              value: { { .Values.env.port | quote } }
-            - name: NODE_ENV
-              value: { { .Values.env.nodeEnv | quote } }
-          resources: { { - toYaml .Values.resources | nindent 10 } }
+              value: {{ (.Values.env.port | default (.Values.service.port | default 5000)) | quote }}
