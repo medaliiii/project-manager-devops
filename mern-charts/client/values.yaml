@@ -1,9 +1,8 @@
 replicaCount: 1
-
 image:
   repository: daliii/project-manager-frontend
   tag: latest
-  pullPolicy: Always
+  pullPolicy: IfNotPresent
 
 service:
   type: ClusterIP
@@ -11,25 +10,11 @@ service:
 
 env:
   serverUrl: "http://server:5000"
-  # Pour React: REACT_APP_SERVER_URL
-  # Pour Angular: API_URL
 
 ingress:
-  enabled: true
+  enabled: false
   className: ""
+  annotations: {}
   host: mern-app.local
   path: /
   pathType: Prefix
-  annotations:
-    nginx.ingress.kubernetes.io/rewrite-target: /
-
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 250m
-    memory: 256Mi
-
-nameOverride: "client"
-fullnameOverride: "client"
