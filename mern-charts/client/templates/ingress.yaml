@@ -1,10 +1,10 @@
-{{- if .Values.ingress.enabled }}
+{{- if and .Values.ingress .Values.ingress.enabled }}
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: {{ .Values.fullnameOverride | default "client" }}-ingress
+  name: {{ include "client.fullname" . }}-ingress
   labels:
-    app: {{ .Values.fullnameOverride | default "client" }}
+    {{- include "client.labels" . | nindent 4 }}
   {{- with .Values.ingress.annotations }}
   annotations:
     {{- toYaml . | nindent 4 }}
@@ -18,10 +18,10 @@ spec:
     http:
       paths:
       - path: {{ .Values.ingress.path }}
-        pathType: {{ .Values.ingress.pathType }}
+        pathType: {{ .Values.ingress.pathType | default "Prefix" }}
         backend:
           service:
-            name: {{ .Values.fullnameOverride | default "client" }}
+            name: {{ include "client.fullname" . }}
             port:
               number: {{ .Values.service.port }}
 {{- end }}
