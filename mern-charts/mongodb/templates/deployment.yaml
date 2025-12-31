@@ -1,18 +1,18 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ .Values.fullnameOverride | default "mongodb" }}
+  name: {{ include "mongodb.fullname" . }}
   labels:
-    app: {{ .Values.fullnameOverride | default "mongodb" }}
+    {{- include "mongodb.labels" . | nindent 4 }}
 spec:
   replicas: {{ .Values.replicaCount }}
   selector:
     matchLabels:
-      app: {{ .Values.fullnameOverride | default "mongodb" }}
+      {{- include "mongodb.selectorLabels" . | nindent 6 }}
   template:
     metadata:
       labels:
-        app: {{ .Values.fullnameOverride | default "mongodb" }}
+        {{- include "mongodb.selectorLabels" . | nindent 8 }}
     spec:
       containers:
       - name: mongodb
@@ -32,5 +32,5 @@ spec:
       volumes:
       - name: mongodb-data
         persistentVolumeClaim:
-          claimName: {{ .Values.fullnameOverride | default "mongodb" }}-pvc
+          claimName: {{ include "mongodb.fullname" . }}-pvc
       {{- end }}

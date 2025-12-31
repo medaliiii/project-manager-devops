@@ -2,9 +2,9 @@
 apiVersion: v1
 kind: PersistentVolumeClaim
 metadata:
-  name: {{ .Values.fullnameOverride | default "mongodb" }}-pvc
+  name: {{ include "mongodb.fullname" . }}-pvc
   labels:
-    app: {{ .Values.fullnameOverride | default "mongodb" }}
+    {{- include "mongodb.labels" . | nindent 4 }}
 spec:
   accessModes:
     - ReadWriteOnce
