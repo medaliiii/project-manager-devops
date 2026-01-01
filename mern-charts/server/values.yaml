@@ -2,7 +2,7 @@ replicaCount: 1
 
 image:
   repository: daliii/project-manager-backend
-  tag: latest
+  tag: "1.0.3"
   pullPolicy: Always
 
 service:
@@ -12,15 +12,3 @@ service:
 env:
   mongoUri: "mongodb://mongodb:27017/mydb"
   port: "5000"
-  nodeEnv: "production"
-
-resources:
-  limits:
-    cpu: 500m
-    memory: 512Mi
-  requests:
-    cpu: 250m
-    memory: 256Mi
-
-nameOverride: "server"
-fullnameOverride: "server"

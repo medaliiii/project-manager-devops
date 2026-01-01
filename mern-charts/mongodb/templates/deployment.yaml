@@ -1,36 +1,34 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "mongodb.fullname" . }}
+  name: mongodb
   labels:
-    {{- include "mongodb.labels" . | nindent 4 }}
+    app: mongodb
 spec:
-  replicas: {{ .Values.replicaCount }}
+  replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
-      {{- include "mongodb.selectorLabels" . | nindent 6 }}
+      app: mongodb
   template:
     metadata:
       labels:
-        {{- include "mongodb.selectorLabels" . | nindent 8 }}
+        app: mongodb
     spec:
       containers:
-      - name: mongodb
-        image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-        imagePullPolicy: {{ .Values.image.pullPolicy }}
-        ports:
-        - containerPort: {{ .Values.service.port }}
-          name: mongodb
-        resources:
-          {{- toYaml .Values.resources | nindent 10 }}
-        {{- if .Values.persistence.enabled }}
-        volumeMounts:
-        - name: mongodb-data
-          mountPath: /data/db
-        {{- end }}
+        - name: mongodb
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
+          ports:
+            - name: mongodb
+              containerPort: {{ .Values.service.port | default 27017 }}
+          {{- if .Values.persistence.enabled }}
+          volumeMounts:
+            - name: mongodb-data
+              mountPath: /data/db
+          {{- end }}
       {{- if .Values.persistence.enabled }}
       volumes:
-      - name: mongodb-data
-        persistentVolumeClaim:
-          claimName: {{ include "mongodb.fullname" . }}-pvc
+        - name: mongodb-data
+          persistentVolumeClaim:
+            claimName: mongodb-pvc
       {{- end }}

@@ -1,27 +1,26 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "client.fullname" . }}
+  name: client
   labels:
-    {{- include "client.labels" . | nindent 4 }}
+    app: client
 spec:
   replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
-      {{- include "client.selectorLabels" . | nindent 6 }}
+      app: client
   template:
     metadata:
       labels:
-        {{- include "client.selectorLabels" . | nindent 8 }}
+        app: client
     spec:
       containers:
         - name: client
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port | default 3000 }}
-              protocol: TCP
           env:
             - name: REACT_APP_SERVER_URL
               value: {{ .Values.env.serverUrl | quote }}

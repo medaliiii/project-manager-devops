@@ -1,29 +1,28 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: {{ include "server.fullname" . }}
+  name: server
   labels:
-    {{- include "server.labels" . | nindent 4 }}
+    app: server
 spec:
   replicas: {{ .Values.replicaCount | default 1 }}
   selector:
     matchLabels:
-      {{- include "server.selectorLabels" . | nindent 6 }}
+      app: server
   template:
     metadata:
       labels:
-        {{- include "server.selectorLabels" . | nindent 8 }}
+        app: server
     spec:
       containers:
         - name: server
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag | default .Chart.AppVersion }}"
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
           imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
           ports:
             - name: http
               containerPort: {{ .Values.service.port | default 5000 }}
-              protocol: TCP
           env:
             - name: MONGO_URI
               value: {{ .Values.env.mongoUri | quote }}
             - name: PORT
-              value: {{ (.Values.env.port | default (.Values.service.port | default 5000)) | quote }}
+              value: {{ .Values.env.port | quote }}
