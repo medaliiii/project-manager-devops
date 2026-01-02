@@ -1,0 +1,68 @@
+---
+# Source: server/templates/configmap-env.yaml
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: server-dotenv
+  labels:
+    app: server
+data:
+  .env: |
+    MONGO_URI=mongodb://mongodb:27017/mydb
+    PORT=5000
+---
+# Source: server/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: server
+  labels:
+    app: server
+spec:
+  type: ClusterIP
+  selector:
+    app: server
+  ports:
+    - name: http
+      port: 5000
+      targetPort: http
+      protocol: TCP
+---
+# Source: server/templates/deployment.yaml
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: server
+  labels:
+    app: server
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: server
+  template:
+    metadata:
+      labels:
+        app: server
+    spec:
+      containers:
+        - name: server
+          image: "daliii/project-manager-backend:1.0.3"
+          imagePullPolicy: Always
+          ports:
+            - name: http
+              containerPort: 5000
+          env:
+            - name: MONGO_URI
+              value: "mongodb://mongodb:27017/mydb"
+            - name: PORT
+              value: "5000"
+          volumeMounts:
+            - name: server-dotenv
+              mountPath: /app/.env
+              subPath: .env
+
+      volumes:
+        - name: server-dotenv
+          configMap:
+            name: server-dotenv
