@@ -26,3 +26,12 @@ spec:
               value: {{ .Values.env.mongoUri | quote }}
             - name: PORT
               value: {{ .Values.env.port | quote }}
+          volumeMounts:
+            - name: server-dotenv
+              mountPath: /app/.env
+              subPath: .env
+
+      volumes:
+        - name: server-dotenv
+          configMap:
+            name: server-dotenv

@@ -1,0 +1,10 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: server-dotenv
+  labels:
+    app: server
+data:
+  .env: |
+    MONGO_URI={{ .Values.env.mongoUri }}
+    PORT={{ .Values.env.port }}
