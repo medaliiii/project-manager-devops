@@ -10,6 +10,6 @@ spec:
     app: client
   ports:
     - name: http
-      port: {{ .Values.service.port | default 3000 }}
+      port: {{ .Values.service.port | default 5173 }}
       targetPort: http
       protocol: TCP

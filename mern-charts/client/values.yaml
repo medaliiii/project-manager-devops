@@ -7,7 +7,8 @@ image:
 
 service:
   type: ClusterIP
-  port: 3000
+  port: 5173
+containerPort: 5173
 
 env:
   serverUrl: "http://server:5000"
