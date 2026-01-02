@@ -1,26 +1,10 @@
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: client
-  labels:
-    app: client
-spec:
-  replicas: {{ .Values.replicaCount | default 1 }}
-  selector:
-    matchLabels:
-      app: client
-  template:
-    metadata:
-      labels:
-        app: client
-    spec:
-      containers:
-        - name: client
-          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
-          imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
-          ports:
-            - name: http
-              containerPort: {{ .Values.service.port | default 3000 }}
-          env:
-            - name: REACT_APP_SERVER_URL
-              value: {{ .Values.env.serverUrl | quote }}
+containers:
+  - name: client
+    image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+    imagePullPolicy: {{ .Values.image.pullPolicy | default "IfNotPresent" }}
+    ports:
+      - name: http
+        containerPort: {{ .Values.service.port | default 3000 }}
+    env:
+      - name: REACT_APP_SERVER_URL
+        value: {{ .Values.env.serverUrl | quote }}

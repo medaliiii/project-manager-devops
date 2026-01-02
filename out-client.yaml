@@ -1,0 +1,29 @@
+---
+# Source: client/templates/service.yaml
+apiVersion: v1
+kind: Service
+metadata:
+  name: client
+  labels:
+    app: client
+spec:
+  type: ClusterIP
+  selector:
+    app: client
+  ports:
+    - name: http
+      port: 3000
+      targetPort: http
+      protocol: TCP
+---
+# Source: client/templates/deployment.yaml
+containers:
+  - name: client
+    image: "daliii/project-manager-frontend:latest"
+    imagePullPolicy: IfNotPresent
+    ports:
+      - name: http
+        containerPort: 3000
+    env:
+      - name: REACT_APP_SERVER_URL
+        value: "http://server:5000"
