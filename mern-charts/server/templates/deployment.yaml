@@ -22,10 +22,18 @@ spec:
             - name: http
               containerPort: {{ .Values.service.port | default 5000 }}
           env:
+            
+            - name: DB_URL
+              value: {{ .Values.env.dbUrl | quote }}
+
+            # (optionnel) si tu veux aussi garder ça
             - name: MONGO_URI
               value: {{ .Values.env.mongoUri | quote }}
+
             - name: PORT
               value: {{ .Values.env.port | quote }}
+
+          # (optionnel si tu utilises un ConfigMap .env)
           volumeMounts:
             - name: server-dotenv
               mountPath: /app/.env

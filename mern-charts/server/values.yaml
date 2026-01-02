@@ -10,5 +10,8 @@ service:
   port: 5000
 
 env:
-  mongoUri: "mongodb://mongodb:27017/mydb"
+  env:
+  dbUrl: "mongodb://mongodb:27017/project_manager"
+  mongoUri: "mongodb://mongodb:27017/project_manager"  
   port: "5000"
+
