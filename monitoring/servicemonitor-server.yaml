@@ -6,12 +6,12 @@ metadata:
   labels:
     release: monitoring
 spec:
-  selector:
-    matchLabels:
-      app: server
   namespaceSelector:
     matchNames:
       - project-manager
+  selector:
+    matchLabels:
+      app: server
   endpoints:
     - port: http
       path: /metrics
